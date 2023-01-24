@@ -39,7 +39,10 @@ namespace WordSearch
             "WELCOME",
             "WINDOW"
         };
-
+        /// <summary>
+        /// Main entry point for Word search project
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
             Console.WriteLine("Word Search");
@@ -68,64 +71,83 @@ namespace WordSearch
         }
 
         /// <summary>
-        /// 
+        /// Takes words from Words array and iterates over Grid of chars to find a starting row/y and column/x,
+        /// when it finds a starting point it takes the result of WordSearch and prints out a result of starting and ending coordinates
+        /// for each word.
         /// </summary>
         private static void FindWords()
         {
             foreach(var word in Words)
             {
+                int [] coordinates = new int []{};
+
                 for (int r = 0; r < Grid.GetLength(0); ++r)
                 {
-                    bool found = false;
                     for (int c = 0; c < Grid.GetLength(1); ++c)
                     {
+                        if(coordinates.Length > 0)
+                        {
+                            break;
+                        }
+
                         if (Grid[r, c] == word[0])
                         {
-                            found = BreadthFirstSearch(r, c, word);
+                            coordinates = WordSearch(r, c, word);
+                            
+                            if(coordinates.Length > 0)
+                            {
+                                break;
+                            }
                         }
                     }
-                    if(found)
-                    {
-                        break;
-                    }
                 }
+                Console.WriteLine(
+                    $"{word} found at ({coordinates[0]}, {coordinates[1]}) to ({coordinates[2]}, {coordinates[3]})"
+                );
             }
         }
 
         /// <summary>
-        /// Method that starts with r and c coordinates, then looks in each direction to detect each word
+        /// Method that starts with r and c coordinates, then looks in each direction to detect each letter in the word's
+        /// sequence.
         /// </summary>
-        /// <param name="sr"></param>
-        /// <param name="sc"></param>
-        /// <param name="word"></param>
-        /// <returns></returns>
-        public static bool BreadthFirstSearch(int sr, int sc, string word)
+        /// <param name="sr">starting row</param>
+        /// <param name="sc">starting column</param>
+        /// <param name="word">word to find</param>
+        /// <returns>string result</returns>
+        public static int [] WordSearch(int sr, int sc, string word)
         {
             int er = -1, ec = -1;
 
-            string toPrint = "";
-            bool wordHasBeenFound = false;
-            int[] directionRow = new int[] { -1, -1, 0, 1, 1, 1, 0, -1 };
-            int[] directionCol = new int[] { 0, 1, 1, 1, 0, -1, -1, -1 };
+            int[] directionRow = new int[] { -1, -1, 0, 1, 1, 1, 0, -1 }; // directional row/y array
+            int[] directionCol = new int[] { 0, 1, 1, 1, 0, -1, -1, -1 }; // directional row/x array
 
             int row = sr;
             int column = sc;
 
+            // Loop through directions
             for (int i = 0; i < 8; ++i)
             {
+                // Loop over word characters
                 for(int j = 1; j < word.Length; ++j)
                 {   
                     int newRow = row + directionRow[i];
                     int newCol = column + directionCol[i];
 
                     if (newRow < 0 || newCol < 0)
+                    {
                         break;
+                    }
 
                     if (newRow >= Grid.GetLength(0) || newCol >= Grid.GetLength(1))
+                    {
                         break;
+                    }
 
                     if(word[j] != Grid[newRow, newCol])
                     {
+                        row = sr;
+                        column = sc;
                         break;
                     }
 
@@ -133,22 +155,15 @@ namespace WordSearch
                     {
                         er = newRow;
                         ec = newCol;
-                        wordHasBeenFound = true;
-                        break;
-                    }
 
+                        return new int [] {sr, sc, er, ec};
+                    }
                     row = newRow;
                     column = newCol;
                 }
-                if(wordHasBeenFound)
-                {
-                    toPrint = $"{word} found at ({sr}, {sc}) to ({er}, {ec})";
-                    Console.WriteLine(toPrint);
-                    break;
-                }
             }
 
-            return wordHasBeenFound;
+            return new int [0];
         }
-}
+    }
 }
