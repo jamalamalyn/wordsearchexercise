@@ -20,7 +20,7 @@ namespace WordSearch
             {'C', 'A', 'R', 'P', 'E', 'T', 'R', 'W', 'N', 'G', 'V', 'Z'}
         };
 
-        static string[] Words = new string[] 
+        static string[] Words = new string[]
         {
             "CARPET",
             "CHAIR",
@@ -67,102 +67,88 @@ namespace WordSearch
             Console.ReadKey();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private static void FindWords()
         {
-            string word = "PUPPY";
-            string result = "";
-
-            for(int r = 0; r < Grid.GetLength(0); ++r)
+            foreach(var word in Words)
             {
-                for(int c = 0; c < Grid.GetLength(1); ++c)
+                for (int r = 0; r < Grid.GetLength(0); ++r)
                 {
-                    if(Grid[r,c] == word[0])
+                    bool found = false;
+                    for (int c = 0; c < Grid.GetLength(1); ++c)
                     {
-                        Console.WriteLine("Found first letter in Grid: " + Grid[r,c]);
-                        result = breadthFirstSearch(r, c, word);
-                        if(!string.IsNullOrEmpty(result))
+                        if (Grid[r, c] == word[0])
                         {
-                            break;
+                            found = BreadthFirstSearch(r, c, word);
                         }
+                    }
+                    if(found)
+                    {
+                        break;
                     }
                 }
             }
-
-            Console.WriteLine(result);
         }
 
-        public static string breadthFirstSearch(int sr, int sc, string word)
+        /// <summary>
+        /// Method that starts with r and c coordinates, then looks in each direction to detect each word
+        /// </summary>
+        /// <param name="sr"></param>
+        /// <param name="sc"></param>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        public static bool BreadthFirstSearch(int sr, int sc, string word)
         {
-            int [] directionRow = new int [] {-1,-1,0,1,1,1,0,-1};
-            int [] directionCol = new int [] {0,1,1,1,0,-1,-1,-1};
-
-            Queue<int> rowQueue = new Queue<int>();
-            Queue<int> columnQueue = new Queue<int>();
-
             int er = -1, ec = -1;
 
-            rowQueue.Enqueue(sr);
-            columnQueue.Enqueue(sc);
+            string toPrint = "";
+            bool wordHasBeenFound = false;
+            int[] directionRow = new int[] { -1, -1, 0, 1, 1, 1, 0, -1 };
+            int[] directionCol = new int[] { 0, 1, 1, 1, 0, -1, -1, -1 };
 
-            bool [,] visited = new bool [Grid.GetLength(0),Grid.GetLength(1)];
-            string stitchedString = "";
+            int row = sr;
+            int column = sc;
 
-            foreach(char c in word)
+            for (int i = 0; i < 8; ++i)
             {
-                while(rowQueue.Count > 0)
-                {
-                    int row = rowQueue.Dequeue();
-                    int column = columnQueue.Dequeue();
+                for(int j = 1; j < word.Length; ++j)
+                {   
+                    int newRow = row + directionRow[i];
+                    int newCol = column + directionCol[i];
 
-                    Console.WriteLine("Checking" + row + ", " + column);
+                    if (newRow < 0 || newCol < 0)
+                        break;
 
-                    visited[row, column] = true;
+                    if (newRow >= Grid.GetLength(0) || newCol >= Grid.GetLength(1))
+                        break;
 
-                    if(c != Grid[row, column])
+                    if(word[j] != Grid[newRow, newCol])
                     {
-                        continue;
-                    }
-                    else 
-                    {
-                        Console.WriteLine("Found " + c + " at " + row + ", " + column);
-                        stitchedString += c;
-                    }
-
-                    if(stitchedString == word)
-                    {
-                        er = row;
-                        ec = column;
                         break;
                     }
 
-                    for(int i = 0; i < 8; ++i)
+                    if(j == word.Length - 1)
                     {
-                        int newRow = row + directionRow[i];
-                        int newCol = column + directionCol[i];
-
-                        if(newRow < 0 || newCol < 0) 
-                            continue;
-
-                        if(newRow >= Grid.GetLength(0) || newCol >= Grid.GetLength(1)) 
-                            continue;
-
-                        if(visited[newRow, newCol]) 
-                            continue;
-
-                        rowQueue.Enqueue(newRow);
-                        columnQueue.Enqueue(newCol);
-                        visited[newRow, newCol] = true;
+                        ec = newRow;
+                        er = newCol;
+                        wordHasBeenFound = true;
+                        break;
                     }
+
+                    row = newRow;
+                    column = newCol;
+                }
+                if(wordHasBeenFound)
+                {
+                    toPrint = $"{word} found at ({sr}, {sc}) to ({er}, {ec})";
+                    Console.WriteLine(toPrint);
+                    break;
                 }
             }
 
-            if(er > -1 && ec > -1){
-                return $"{word} found at ({sr}, {sc}) to ({er}, {ec})";
-            }
-            else 
-            {
-                return null;
-            }
+            return wordHasBeenFound;
         }
-    }
+}
 }
