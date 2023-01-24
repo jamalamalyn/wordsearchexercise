@@ -131,8 +131,8 @@ namespace WordSearch
 
                     if(j == word.Length - 1)
                     {
-                        ec = newRow;
-                        er = newCol;
+                        er = newRow;
+                        ec = newCol;
                         wordHasBeenFound = true;
                         break;
                     }
